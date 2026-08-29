@@ -1,0 +1,30 @@
+{
+  "name": "reminders",
+  "version": "0.1.0+codex.20260829163348",
+  "description": "Manage Apple Reminders locally from Codex",
+  "author": {
+    "name": "Vlad Kalashnikov"
+  },
+  "license": "MIT",
+  "skills": "./skills/",
+  "mcpServers": "./.mcp.json",
+  "interface": {
+    "displayName": "Reminders",
+    "shortDescription": "Manage Apple Reminders locally.",
+    "longDescription": "Create, find, edit, complete, move, and delete Apple reminders and lists through the local EventKit database.",
+    "developerName": "Vlad Kalashnikov",
+    "category": "Productivity",
+    "capabilities": [
+      "Read",
+      "Write",
+      "Local"
+    ],
+    "composerIcon": "./assets/icon.png",
+    "logo": "./assets/icon.png",
+    "defaultPrompt": [
+      "Show my reminders due today.",
+      "Create a reminder for tomorrow.",
+      "Move an overdue reminder to next week."
+    ]
+  }
+}

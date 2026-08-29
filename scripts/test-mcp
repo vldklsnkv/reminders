@@ -1,0 +1,38 @@
+#!/bin/zsh
+set -euo pipefail
+
+plugin_root="${0:A:h:h}"
+binary="$plugin_root/.build/release/reminders-mcp"
+
+if [[ ! -x "$binary" ]]; then
+  swift build --package-path "$plugin_root" -c release --product reminders-mcp >&2
+fi
+
+response="$({
+  print -r -- '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2025-06-18","capabilities":{},"clientInfo":{"name":"smoke-test","version":"1"}}}'
+  print -r -- '{"jsonrpc":"2.0","method":"notifications/initialized"}'
+  print -r -- '{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+  print -r -- '{"jsonrpc":"2.0","id":3,"method":"tools/call","params":{"name":"reminders_access_status","arguments":{}}}'
+  print -r -- '{"jsonrpc":"2.0","id":4,"method":"tools/call","params":{"name":"reminders_list_lists","arguments":{}}}'
+} | "$binary")"
+
+python3 -c '
+import json, sys
+rows = [json.loads(line) for line in sys.stdin if line.strip()]
+assert len(rows) == 4, rows
+assert rows[0]["result"]["serverInfo"]["name"] == "apple-reminders"
+names = {tool["name"] for tool in rows[1]["result"]["tools"]}
+expected = {
+    "reminders_access_status", "reminders_request_access", "reminders_list_lists",
+    "reminders_create_list", "reminders_update_list", "reminders_delete_list",
+    "reminders_search", "reminders_get", "reminders_create", "reminders_update",
+    "reminders_complete", "reminders_delete",
+}
+assert names == expected, (names, expected)
+assert rows[2]["result"]["structuredContent"]["status"] == "full_access"
+list_result = rows[3]["result"]
+assert list_result["isError"] is False, list_result
+list_count = list_result["structuredContent"]["count"]
+assert isinstance(list_count, int) and list_count >= 0
+print(f"ok: {len(names)} tools, full_access, {list_count} lists readable")
+' <<< "$response"

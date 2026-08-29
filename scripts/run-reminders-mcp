@@ -1,0 +1,11 @@
+#!/bin/zsh
+set -euo pipefail
+
+plugin_root="${0:A:h:h}"
+binary="$plugin_root/.build/release/reminders-mcp"
+
+if [[ ! -x "$binary" ]] || [[ "$plugin_root/Package.swift" -nt "$binary" ]] || [[ -n "$(find "$plugin_root/Sources" -type f -newer "$binary" -print -quit 2>/dev/null)" ]]; then
+  swift build --package-path "$plugin_root" -c release --product reminders-mcp >&2
+fi
+
+exec "$binary"

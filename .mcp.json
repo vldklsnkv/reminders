@@ -1,0 +1,9 @@
+{
+  "mcpServers": {
+    "apple-reminders": {
+      "cwd": ".",
+      "command": "./scripts/run-reminders-mcp",
+      "args": []
+    }
+  }
+}
